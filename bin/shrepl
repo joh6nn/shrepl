@@ -1,0 +1,110 @@
+#! /bin/sh
+
+show_help() {
+	cat <<HELP
+Usage: shrepl [options] command ...
+
+Options:
+--help   	Display this message
+--man    	Display this message, present for compatability with `repl`
+--stdin  	Pipe input to command\'s STDIN
+--debug  	Display each command executed
+--version	Display version
+HELP
+	exit
+}
+
+show_version() {
+	cat <<VERSION
+shrepl, version 1.0 2011-10-15
+VERSION
+	exit 1
+}
+
+unset debug
+unset from_stdin
+unset man
+unset cfile
+unset hfile
+
+if [ $# = 0 ]; then
+	show_help
+fi
+
+#loop through args, remove current arg from list as we go
+for arg in $@; do
+	case $arg in
+		--stdin )
+			from_stdin="true";
+			shift;;
+		--debug )
+			debug="true";
+			shift;;
+		--version )
+			show_version
+			exit 1;;
+		--help|-help|help|--man)
+			show_help
+			exit 1;;
+	esac
+done
+
+#if no args left, then show_help and exit
+if [ $# = 0 ]; then
+	show_help
+fi
+
+command="$@"
+
+completion_dir=${REPL_COMPLETION_DIR:-"${HOME}/.repl"}
+if [ -d "$completion_dir" ]; then
+	if [ -r "$completion_dir/$command" ]; then
+		cfile="$completion_dir/$command"
+	fi
+fi
+
+history_dir=${REPL_HISTORY_DIR:-"${HOME}"}
+if [ -d $"history_dir" ]; then
+	if [ -r"${history_dir}/.${command}_history" ]; then
+		hfile="${history_dir}/.${command}_history"
+	fi
+fi
+
+#if rlwrap exists, and we're not already using it, attempt to use it with any completion and history files available
+if [ -n "$(/bin/which rlwrap 2> /dev/null)" ] && [ -z "${REPL_WRAPPED}" ]; then
+	REPL_WRAPPED='1'
+	export REPL_WRAPPED
+	
+	rlargs=""
+	if [ -n "$cfile" ]; then
+		rlargs="${rlargs} -f ${cfile}"
+	fi
+	if [ -n "$hfile" ]; then
+		rlargs="${rlargs} -H ${hfile}"
+	fi
+
+	exec rlwrap ${rlargs} $0 $@
+fi
+
+#main REPL loop
+while [ 0 ]; do
+	echo -n ${REPL_PROMPT:="${command}>"}" "
+	
+	read line
+
+	if [ -n "$from_stdin" ]; then
+		run=$(printf "echo \"%s\" | ${command}" "${line}")
+	else
+		run=$(printf "${command} %s" "${line}")
+	fi
+	
+	if [ -n "$debug" ]; then
+		echo "${run}"
+	fi
+	
+	/bin/sh -c "$run"
+	
+	if [ "exit" = "$line" ] || [ "quit" = "$line" ] ; then
+		echo "\nUse Ctrl-C (i.e. BREAK) to exit"
+	fi
+done

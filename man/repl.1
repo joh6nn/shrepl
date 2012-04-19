@@ -1,0 +1,170 @@
+.\" generated with Ronn/v0.5
+.\" http://github.com/rtomayko/ronn/
+.
+.TH "REPL" "1" "May 2010" "DEFUNKT" ""
+.
+.SH "NAME"
+\fBrepl\fR \-\- sometimes you need a repl
+.
+.SH "SYNOPSIS"
+\fBrepl\fR \fI[repl\-options]\fR \fIcommand\fR <...>
+.
+.SH "DESCRIPTION"
+\fBrepl\fR wraps a non\-interactive \fBcommand\fR in an interactive
+read\-eval\-print\-loop prompt. Each line you type into the prompt is
+executed as arguments to \fBcommand\fR. Anything written to standard
+output or standard error by the \fBcommand\fR is displayed.
+.
+.P
+If you have \fBrlwrap(1)\fR installed you'll automatically get the full
+benefits of readline: history, reverse searches, etc.
+.
+.P
+\fBrepl\fR is meant to wrap programs which accept command line arguments
+and print to the standard output. It keeps no state between executed
+lines and, as such, cannot be used to replace \fBirb\fR or the Python
+REPL (for example).
+.
+.SH "EXAMPLES"
+Using \fBrepl\fR with \fBredis\-cli\fR:
+.
+.IP "" 4
+.
+.nf
+
+$ repl redis\-cli
+>> set name chris
+OK
+>> get name
+chris
+>> info
+redis_version:1.000
+uptime_in_seconds:182991
+uptime_in_days:2
+.. etc ..
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Using \fBrepl\fR with Ruby's \fBgem\fR:
+.
+.IP "" 4
+.
+.nf
+
+$ repl gem
+>> \-\-version
+1.3.5
+>> search yajl
+
+*** LOCAL GEMS ***
+
+yajl\-ruby (0.6.7)
+>> search yajl \-r
+
+*** REMOTE GEMS ***
+
+brianmario\-yajl\-ruby (0.6.3)
+filipegiusti\-yajl\-ruby (0.6.4)
+jdg\-yajl\-ruby (0.5.12)
+oortle\-yajl\-ruby (0.5.8)
+yajl\-ruby (0.6.7)
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Using \fBrepl\fR with \fBgit\fR:
+.
+.IP "" 4
+.
+.nf
+
+$ repl git
+>> branch
+  gh\-pages
+* master
+>> tag
+rm
+v0.1.0
+v0.1.1
+v0.1.2
+v0.1.3
+>> tag \-d rm
+Deleted tag 'rm'
+>> pwd
+git: 'pwd' is not a git\-command. See 'git \-\-help'.
+
+Did you mean this?
+  add
+.
+.fi
+.
+.IP "" 0
+.
+.SH "OPTIONS"
+.
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Displays usage information.
+.
+.TP
+\fB\-\-stdin\fR
+Pipe input to command's STDIN.
+.
+.TP
+\fB\-\-debug\fR
+Displays debug information while running.
+.
+.TP
+\fB\-\-man\fR
+Displays this man page.
+.
+.SH "COMPLETION"
+Because \fBrlwrap\fR supports completion, \fBrepl\fR does too. Any file in \fB~/.repl\fR matching the name of the command you start \fBrepl\fR with will
+be used for completion.
+.
+.P
+For instance, a file named \fB~/.repl/redis\-cli\fR containing "get set
+info" will cause "get", "set", and "info" to be tab completeable at
+the \fBrepl redis\-cli\fR prompt.
+.
+.P
+The directory searched for completion files can be configured using
+the \fBREPL_COMPLETION_DIR\fR environment variable.
+.
+.SH "COMMAND HISTORY"
+Because \fBrlwrap\fR supports command history, \fBrepl\fR does too. Any file in \fB~/\fR matching the name of the command you start \fBrepl\fR with prefix
+with a dot and suffixed with "_history" will be used for completion.
+.
+.P
+For instance, a file named \fB~/.redis\-cli_history\fR containing a newline
+separated list of "get set info" will cause "get", "set", and "info"
+to be reachable using the up arrow as command history at the \fBrepl
+redis\-cli\fR prompt.
+.
+.P
+The directory searched for history files can be configured using the \fBREPL_HISTORY_DIR\fR environment variable.
+.
+.SH "ENVIRONMENT"
+.
+.SS "REPL_PROMPT"
+the prompt to display before each line of input. defaults to >>
+.
+.SS "REPL_COMPLETION_DIR"
+directory in which completion files are kept
+.
+.SS "REPL_HISTORY_DIR"
+directory in which command history files are kept
+.
+.SH "BUGS"
+\fIhttp://github.com/defunkt/repl/issues\fR
+.
+.SH "AUTHOR"
+Chris Wanstrath :: chris@ozmm.org :: @defunkt
+.
+.SH "SEE ALSO"
+rlwrap(1), readline(3), \fIhttp://github.com\fR, \fIhttp://github.com/defunkt/repl\fR
